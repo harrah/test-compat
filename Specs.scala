@@ -5,15 +5,9 @@ import org.scalatools.testing._
 class SpecsFramework extends Framework
 {
 	val name = "specs"
-	val tests = Array[TestFingerprint](specFingerprint)
+	val tests = Fingerprint.moduleAndClass("org.specs.Specification")
 
 	def testRunner(loader: ClassLoader,  loggers: Array[Logger]): Runner = new SpecsRunner(loader, loggers)
-
-	private def specFingerprint =
-		new TestFingerprint {
-			val superClassName = "org.specs.Specification"
-			val isModule = true
-		}
 }
 
 /** The test runner for specs tests. */
@@ -24,9 +18,7 @@ private class SpecsRunner(loader: ClassLoader, loggers: Array[Logger]) extends R
 
 	def run(testClassName: String, fingerprint: TestFingerprint, handler: EventHandler, args: Array[String])
 	{
-		val obj = Class.forName(testClassName + "$", true, loader)
-		val test = obj.getField("MODULE$").get(null).asInstanceOf[Specification]
-
+		val test = Load(testClassName, loader, fingerprint).asInstanceOf[Specification]
 		val output = new SpecsOutput(loggers)
 		output.output(reportSpecification(test))
 		handler.handle(new TestEvent(testClassName, if(output.succeeded) Result.Success else Result.Failure, null))

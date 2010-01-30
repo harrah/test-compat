@@ -5,15 +5,9 @@ import org.scalatools.testing._
 class ScalaCheckFramework extends Framework
 {
 	val name = "ScalaCheck"
-	val tests = Array[TestFingerprint](propertiesFingerprint)
+	val tests = Fingerprint.moduleOnly("org.scalacheck.Properties")
 
 	def testRunner(loader: ClassLoader,  loggers: Array[Logger]): Runner = new ScalaCheckRunner(loader, loggers)
-
-	private def propertiesFingerprint =
-		new TestFingerprint {
-			val superClassName = "org.scalacheck.Properties"
-			val isModule = true
-		}
 }
 
 /** The test runner for ScalaCheck tests. */
@@ -22,7 +16,7 @@ private class ScalaCheckRunner(loader: ClassLoader, loggers: Array[Logger]) exte
 	import org.scalacheck.{Pretty, Properties, Test}
 	def run(testClassName: String, fingerprint: TestFingerprint, handler: EventHandler, args: Array[String])
 	{
-		val test = Module(testClassName, loader).asInstanceOf[Properties]
+		val test = Load.module(testClassName, loader).asInstanceOf[Properties]
 		Test.checkProperties(test, Test.defaultParams, propReport, testReport(handler))
 	}
 	private def propReport(pName: String, s: Int, d: Int) {}
@@ -60,17 +54,9 @@ private class ScalaCheckRunner(loader: ClassLoader, loggers: Array[Logger]) exte
 		// the following is equivalent to: (Pretty.prettyTestRes(res))(Pretty.defaultParams)
 		// and is necessary because of binary incompatibility in Pretty between ScalaCheck 1.5 and 1.6
 		val loader = getClass.getClassLoader
-		val prettyObj = Module("org.scalacheck.Pretty", loader)
+		val prettyObj = Load.module("org.scalacheck.Pretty", loader)
 		val prettyInst = prettyObj.getClass.getMethod("prettyTestRes", classOf[Test.Result]).invoke(prettyObj, res)
 		val defaultParams = prettyObj.getClass.getMethod("defaultParams").invoke(prettyObj)
 		prettyInst.getClass.getMethod("apply", Class.forName("org.scalacheck.Pretty$Params", true, loader)).invoke(prettyInst, defaultParams).toString
-	}
-}
-object Module
-{
-	def apply(name: String, loader: ClassLoader): AnyRef =
-	{
-		val obj = Class.forName(name + "$", true, loader)
-		obj.getField("MODULE$").get(null)
 	}
 }

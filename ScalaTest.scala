@@ -5,15 +5,9 @@ import org.scalatools.testing._
 class ScalaTestFramework extends Framework
 {
 	val name = "ScalaTest"
-	val tests = Array[TestFingerprint](suiteFingerprint)
+	val tests = Fingerprint.classOnly("org.scalatest.Suite")
 
 	def testRunner(loader: ClassLoader,  loggers: Array[Logger]): Runner = new ScalaTestRunner(loader, loggers)
-
-	private def suiteFingerprint =
-		new TestFingerprint {
-			val superClassName = "org.scalatest.Suite"
-			val isModule = false
-		}
 }
 
 /** The test runner for ScalaTest tests. Based on Josh Cough's translation of sbt's original runner.*/
@@ -23,8 +17,7 @@ private class ScalaTestRunner(loader: ClassLoader, loggers: Array[Logger]) exten
 	{
 		def result(r: Result) { handler.handle(new TestEvent(testClassName, r, null)) }
 		import org.scalatest.{Filter, Stopper, Suite, Tracker}
-		val testClass = Class.forName(testClassName, true, loader).asSubclass(classOf[Suite])
-		val test = testClass.newInstance
+		val test = Load.`class`(testClassName, loader).asInstanceOf[Suite]
 		val reporter = new ScalaTestReporter
 		test.run(None, reporter, new Stopper {}, Filter(), Map.empty, None, new Tracker)
 		result( if(reporter.succeeded) Result.Success else Result.Failure )

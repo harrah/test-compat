@@ -7,6 +7,8 @@ class TestCompatProject(info: ProjectInfo) extends DefaultProject(info)
 	val scalatest = "org.scalatest" % "scalatest" % "1.0" % "provided"
 	val specs = "org.scala-tools.testing" % "specs" % "1.6.0" % "provided"
 
+	override def compatTestFramework = Set()
+
 	// publishing
 	override def managedStyle = ManagedStyle.Maven
 	val publishTo = "Scala Tools Nexus" at "http://nexus.scala-tools.org/content/repositories/releases/"
