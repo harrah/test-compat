@@ -9,6 +9,10 @@ class TestCompatProject(info: ProjectInfo) extends DefaultProject(info)
 
 	override def compatTestFramework = Set()
 
+	/* Additional resources to include in the produced jar.*/
+	def extraResources = descendents(info.projectPath / "licenses", "*") +++ "LICENSE" +++ "NOTICE"
+	override def mainResources = super.mainResources +++ extraResources
+
 	// publishing
 	override def managedStyle = ManagedStyle.Maven
 	val publishTo = "Scala Tools Nexus" at "http://nexus.scala-tools.org/content/repositories/releases/"

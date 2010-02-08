@@ -1,3 +1,7 @@
+/* sbt -- Simple Build Tool
+ * Copyright 2009, 2010 Mark Harrah
+* Copyright 2007-2008 Eric Torreborre.
+ */
 package sbt.impl
 
 import org.scalatools.testing._
